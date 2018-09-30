@@ -16,6 +16,8 @@ Route::namespace('Im')->group(function () {
     Route::get('/', 'IndexController@index');
 
     Route::prefix('/im/index')->group(function () {
+        Route::get('/test', 'IndexController@test');
+
         //登录
         Route::post('/register', 'IndexController@register');
 

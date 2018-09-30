@@ -48,4 +48,9 @@ class IndexController extends Controller
 
         return $this->success();
     }
+
+    public function test()
+    {
+        return $this->success();
+    }
 }
