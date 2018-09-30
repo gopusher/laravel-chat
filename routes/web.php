@@ -11,6 +11,12 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::namespace('Im')->group(function () {
+    //首页
+    Route::get('/', 'IndexController@index');
+
+    Route::prefix('/im/index')->group(function () {
+        //登录
+        Route::post('/register', 'IndexController@register');
+    });
 });

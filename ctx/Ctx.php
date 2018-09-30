@@ -7,6 +7,7 @@ use PHPCtx\Ctx\Ctx as BasicCtx;
 /**
  * Context 上下文
  *
+ * @property \Ctx\Service\Im\Ctx $Im
  */
 class Ctx extends BasicCtx
 {

@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 class Handler extends ExceptionHandler
 {
@@ -46,6 +47,23 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+        if ($request->expectsJson()) {
+            $statusCode = 500; //异常 状态码
+            $headers = [];
+
+            if ($exception instanceof HttpExceptionInterface) {
+                $statusCode = $exception->getStatusCode();
+                $headers = $exception->getHeaders();
+            }
+
+            return response()->json([
+                'code'      => 0,   //错误代码 0：正确，-1：服务器错误，1：请求错误
+                'data'      => [], //返回数据体
+                'error'     => $exception->getMessage(),//返回消息
+//                'error'     => (string) $exception,//返回消息
+            ], $statusCode, $headers);
+        }
+
         return parent::render($request, $exception);
     }
 }
