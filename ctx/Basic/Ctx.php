@@ -11,4 +11,5 @@ use PHPCtx\Ctx\Basic\Ctx as BasicCtx;
  */
 abstract class Ctx extends BasicCtx
 {
+    protected $imRedisKey = 'im:';
 }

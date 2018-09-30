@@ -55,7 +55,7 @@ IndexPage.prototype = {
             "name": name
         }, function (data) {
             if (data.code != 0) {
-                // alert(data.msg);
+                alert(data.error);
                 console.log("register" + data.msg)
                 return ;
             }

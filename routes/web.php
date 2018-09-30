@@ -18,10 +18,11 @@ Route::namespace('Im')->group(function () {
     Route::prefix('/im/index')->group(function () {
         Route::get('/test', 'IndexController@test');
 
-        //登录
-        Route::post('/register', 'IndexController@register');
-
         //comet 接入层rpc入口
         Route::post('/rpc', 'RpcController@rpc');
+
+        //登录
+        Route::post('/register', 'IndexController@register');
+        Route::get('/connectInfo', 'IndexController@connectInfo');
     });
 });

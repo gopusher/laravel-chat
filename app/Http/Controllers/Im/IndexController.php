@@ -30,14 +30,18 @@ class IndexController extends Controller
      */
     public function register()
     {
-        if (! empty($_SESSION['uid'])) {
+        $uid = $this->request->session()->get('uid', '');
+
+        if (! empty($uid)) {
             return $this->success(); //已经注册成功过，跳过注册逻辑.
         }
-        if (empty($_POST['name'])) {
+
+        $name = $this->request->input('name');
+
+        if (empty($name)) {
             throw new \Exception('名字不能为空');
         }
 
-        $name = $_POST['name'];
         if (mb_strlen($name) > 16) {
             throw new \Exception('名字最大为16个字');
         }
@@ -49,8 +53,27 @@ class IndexController extends Controller
         return $this->success();
     }
 
+    public function connectInfo()
+    {
+        $uid = $this->request->session()->get('uid', '');
+        if (empty($uid)) {
+            throw new \Exception("非法的请求");
+        }
+
+        return $this->success([
+            'wsHost'    => $this->ctx->Im->getConnectInfo($uid),
+        ]);
+    }
+
     public function test()
     {
-        return $this->success();
+        $uid = $this->request->session()->get('uid', '');
+        if (empty($uid)) {
+            throw new \Exception("非法的请求");
+        }
+
+        $data = $this->ctx->Im->getConnectInfo($uid);
+
+        return $this->success($data);
     }
 }

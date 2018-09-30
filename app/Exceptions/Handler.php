@@ -48,7 +48,7 @@ class Handler extends ExceptionHandler
     public function render($request, Exception $exception)
     {
         if ($request->expectsJson()) {
-            $statusCode = 500; //异常 状态码
+            $statusCode = 500;
             $headers = [];
 
             if ($exception instanceof HttpExceptionInterface) {
@@ -57,11 +57,11 @@ class Handler extends ExceptionHandler
             }
 
             return response()->json([
-                'code'      => 0,   //错误代码 0：正确，-1：服务器错误，1：请求错误
+                'code'      => -1,   //错误代码 0：正确，-1：服务器错误，1：请求错误
                 'data'      => [], //返回数据体
                 'error'     => $exception->getMessage(),//返回消息
 //                'error'     => (string) $exception,//返回消息
-            ], $statusCode, $headers);
+            ], 200, $headers);
         }
 
         return parent::render($request, $exception);
