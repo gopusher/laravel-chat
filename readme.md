@@ -2,7 +2,7 @@
 
 这是一个聊天应用，界面如: [https://chat.yadou.net](https://chat.yadou.net)
 
-所有的业务逻辑采用Laravel实现，长连接采用[Gopusher Comet](https://github.com/Gopusher/comet)接入层实现。除了Laravel外，还引入以下依赖：
+所有的业务逻辑（逻辑层和路由层）采用Laravel实现，长连接采用[Gopusher Comet](https://github.com/Gopusher/comet)(接入层)实现。除了Laravel外，还引入以下依赖：
 
 * [phpctx/ctx](https://github.com/phpctx/ctx) 一个Service服务模块化组织框架
 * [predis/predis](https://github.com/nrk/predis) Redis库
