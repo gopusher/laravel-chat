@@ -136,16 +136,4 @@ class IndexController extends Controller
 
         return $this->success();
     }
-
-    public function test()
-    {
-        $uid = $this->request->session()->get('uid', '');
-        if (empty($uid)) {
-            throw new \Exception("非法的请求");
-        }
-
-        $data = $this->ctx->Im->getConnectInfo($uid);
-
-        return $this->success($data);
-    }
 }

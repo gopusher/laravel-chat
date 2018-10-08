@@ -16,8 +16,6 @@ Route::namespace('Im')->group(function () {
     Route::get('/', 'IndexController@index');
 
     Route::prefix('/im/index')->group(function () {
-        Route::get('/test', 'IndexController@test');
-
         //comet 接入层rpc入口
         Route::post('/rpc', 'RpcController@rpc');
 
