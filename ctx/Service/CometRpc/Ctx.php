@@ -52,7 +52,9 @@ class Ctx extends BasicCtx
         $ret = [];
         $allCometServers = $this->getAllCometServers();
         foreach ($nodes as $node) {
-            $ret[$node] = $allCometServers[$node];
+            if (isset($allCometServers[$node])) {
+                $ret[$node] = $allCometServers[$node];
+            }
         }
 
         return $ret;
@@ -106,21 +108,11 @@ class Ctx extends BasicCtx
     private function parseClientInfo($clientInfo)
     {
         try {
-            $clientInfo = $this->json_decode($clientInfo);
+            $clientInfo = $this->ctx->Util->json_decode($clientInfo);
             return Arr::get($clientInfo, 'uid');
         } catch (\Exception $e) {
             throw new \Exception('解析clientInfo出错 >> ' . $e->getMessage());
         }
-    }
-
-    private function json_decode($string)
-    {
-        $data = json_decode($string, true);
-        if (json_last_error() !== JSON_ERROR_NONE || ! is_array($data)) {
-            throw new \Exception(sprintf('json 数据解析错误，string: %s, error: %s'), $string, json_last_error_msg());
-        }
-
-        return $data;
     }
 
     //在线用户
@@ -144,7 +136,7 @@ class Ctx extends BasicCtx
         $userConnInfo = $this->ctx->Util->redis()->hget($onlineKey, $uid);
         if (! empty($userConnInfo)) { //已经存在其他连接
             try {
-                $userConnInfo = $this->json_decode($userConnInfo);
+                $userConnInfo = $this->ctx->Util->json_decode($userConnInfo);
                 $userConnInfo[$connId] = $rpcAddr;
                 $this->ctx->Util->redis()->hset($onlineKey, $uid, json_encode($userConnInfo));
             } catch (\Exception $e) {
@@ -189,7 +181,7 @@ class Ctx extends BasicCtx
         $userConnInfo = $this->ctx->Util->redis()->hget($onlineKey, $uid);
         if (! empty($userConnInfo)) { //已经存在其他连接
             try {
-                $userConnInfo = $this->json_decode($userConnInfo);
+                $userConnInfo = $this->ctx->Util->json_decode($userConnInfo);
                 unset($userConnInfo[$connId]);
                 if (! empty($userConnInfo)) {
                     $this->ctx->Util->redis()->hset($onlineKey, $uid, json_encode($userConnInfo));
@@ -236,5 +228,26 @@ class Ctx extends BasicCtx
         }
 
         return $ret;
+    }
+
+    /**
+     * @param $uidArr
+     * @return array 如:
+     *      array(
+     *          'uid'   => json_encode(array(
+     *              'conn_id_1' => comet1,
+     *          ))
+     *      )
+     */
+    public function getUsersConnections($uidArr)
+    {
+        if (empty($uidArr)) {
+            return [];
+        }
+
+        $onlineKey = $this->getOnlineKey();
+        $connections = $this->redis->hmget($onlineKey, ...$uidArr);
+
+        return array_combine($uidArr, $connections);
     }
 }

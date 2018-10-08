@@ -3,6 +3,7 @@
 namespace Ctx\Service\Util;
 
 use Ctx\Basic\Ctx as BasicCtx;
+use Ctx\Basic\Exception;
 
 /**
  * 模块接口声明文件
@@ -31,5 +32,20 @@ class Ctx extends BasicCtx
     public function redis($redis = 'default')
     {
         return $this->redis->get($redis);
+    }
+
+    /**
+     * @param $string
+     * @return mixed
+     * @throws Exception
+     */
+    public function json_decode($string)
+    {
+        $data = json_decode($string, true);
+        if (json_last_error() !== JSON_ERROR_NONE || ! is_array($data)) {
+            throw new Exception(sprintf('json 数据解析错误，string: %s, error: %s', $string, json_last_error_msg()));
+        }
+
+        return $data;
     }
 }

@@ -30,5 +30,10 @@ Route::namespace('Im')->group(function () {
         Route::post('/pushOnline', 'IndexController@pushOnline');
         //获取当前在线用户列表
         Route::get('/getGroupOnlineUsers', 'IndexController@getGroupOnlineUsers');
+
+        //发送给指定uid
+        Route::post('/sendToUser', 'IndexController@sendToUser');
+        //发送给指定群
+        Route::post('/sendToGroup', 'IndexController@sendToGroup');
     });
 });

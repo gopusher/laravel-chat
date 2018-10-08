@@ -105,6 +105,39 @@ class IndexController extends Controller
         return $this->success($this->ctx->CometRpc->getGroupOnlineUsers($group));
     }
 
+    //todo 限制发送频率
+    //todo 限制消息长度
+    public function sendToGroup()
+    {
+        $from = $this->request->session()->get('uid', '');
+        if (empty($from)) {
+            throw new \Exception("非法的请求");
+        }
+
+        $msg = htmlspecialchars($this->request->input('msg', ''));
+        $to = $this->request->input('to');
+        $this->ctx->Im->sendToGroup($from, $to, $msg);
+
+        return $this->success();
+    }
+
+    //todo 限制发送频率
+    //todo 限制消息长度
+    public function sendToUser()
+    {
+        $uid = $this->request->session()->get('uid', '');
+        if (empty($uid)) {
+            throw new \Exception("非法的请求");
+        }
+
+        $from = $_SESSION['uid'];
+        $to = (string) $_POST['to'];
+        $msg = htmlspecialchars((string) $_POST['msg']);
+        $this->ctx->Im->sendToUser($from, $to, $msg);
+
+        return $this->success();
+    }
+
     public function test()
     {
         $uid = $this->request->session()->get('uid', '');

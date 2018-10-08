@@ -4,6 +4,7 @@ namespace Ctx\Service\Im;
 
 use Ctx\Basic\Ctx as BasicCtx;
 use Ctx\Basic\Exception;
+use Ctx\Service\Im\Child\JsonRPC;
 
 /**
  * 模块接口声明文件
@@ -17,9 +18,16 @@ class Ctx extends BasicCtx
      */
     private $redis;
 
+    /**
+     * @var JsonRPC
+     */
+    private $rpcClient;
+
     public function init()
     {
         $this->redis = $this->ctx->Util->redis();
+
+        $this->rpcClient = $this->loadC('JsonRPC');
     }
 
     //TODO 按照一定策略获取机器，如同一个群组的在一个机器或则cpu空闲的机器
@@ -114,5 +122,76 @@ class Ctx extends BasicCtx
     {
         $redisKey = $this->geGroupKey($group);
         return array_keys($this->redis->hgetall($redisKey));
+    }
+
+    //消息类型
+    const MESSAGE_TYPE_PERSON = 'person';
+    const MESSAGE_TYPE_GROUP = 'group';
+
+    const MESSAGE_CONTENT_TYPE_TEXT = 'text';
+    const MESSAGE_CONTENT_TYPE_ONLINE = 'online';
+
+    public function sendToUser($from, $to, $msg)
+    {
+        //私聊需要双写
+        $connections = $this->getUsersConnectionsGroupByCometAddr([$from, $to]);
+
+        foreach ($connections as $addr => $connIds) {
+            list($host, $port) = explode(':', $addr);
+
+            $msgBody = json_encode([
+                'from'          => $from,
+                'to'            => $to,
+                'type'          => self::MESSAGE_TYPE_PERSON,
+                'contentType'   => self::MESSAGE_CONTENT_TYPE_TEXT,
+                'content'       => $msg,
+            ]);
+            //todo 判断发送结果
+            $ret = $this->rpcClient->SendToConnections($host, $port, $this->getItem('comet_rpc_token'), $connIds, $msgBody);
+            \Log::error(var_export($ret, true));
+        }
+
+        return true;
+    }
+
+    public function sendToGroup($from, $to, $msg)
+    {
+        $uids = $this->getGroupUsers($to);
+        $connections = $this->getUsersConnectionsGroupByCometAddr((array) $uids);
+
+        foreach ($connections as $addr => $connIds) {
+            list($host, $port) = explode(':', $addr);
+
+            $msgBody = json_encode([
+                'from'          => $from,
+                'to'            => $to,
+                'type'          => self::MESSAGE_TYPE_GROUP,
+                'contentType'   => self::MESSAGE_CONTENT_TYPE_TEXT,
+                'content'       => $msg,
+            ]);
+            //todo 判断发送结果
+            $this->rpcClient->SendToConnections($host, $port, $this->getItem('comet_rpc_token'), $connIds, $msgBody);
+        }
+
+        return true;
+    }
+
+    private function getUsersConnectionsGroupByCometAddr(array $uidArr)
+    {
+        $ret = $this->ctx->CometRpc->getUsersConnections($uidArr);
+
+        $connections = [];
+        foreach ($ret as $uid => $row) {
+            if (empty($row)) { //uid 不存在连接
+                //todo 后续增加更多处理
+                continue;
+            }
+
+            foreach ($this->ctx->Util->json_decode($row) as $connId => $addr) {
+                $connections[$addr][] = $connId;
+            }
+        }
+
+        return $connections;
     }
 }
