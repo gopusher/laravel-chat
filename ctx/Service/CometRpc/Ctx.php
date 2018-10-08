@@ -105,7 +105,12 @@ class Ctx extends BasicCtx
         $node = substr($node, 7);
         $this->ctx->Util->redis()->hdel($this->getCometServerKey(), [$node]);
 
-        //todo 移除 服务器 连接的用户的在线状态
+        //移除 服务器 连接的用户的在线状态
+        //[$connId => $uid]
+        //可以提供批量下线方法，合并 redis 操作，部分redis命令支持批量
+        foreach ($this->ctx->Util->redis()->hgetall($this->getComet2ConnKey($node)) as $connId => $uid) {
+            $this->userOffline($uid, $connId, $node);
+        }
 
         return true;
     }
@@ -178,14 +183,9 @@ class Ctx extends BasicCtx
         return $this->imRedisKey. 'comet:map:' . $rpcAddr;
     }
 
-    /**
-     * client 离线 回调
-     *
-     * 离线状态上报处理
-     */
-    public function offline($connId, $clientInfo, $rpcAddr)
+    private function userOffline($uid, $connId, $rpcAddr)
     {
-        $uid = $this->parseClientInfo($clientInfo);
+        //其实可以通过 $uid 获取 $connId
         $onlineKey = $this->getOnlineKey();
 
         //todo 加锁 防止并发的时候出错
@@ -215,6 +215,18 @@ class Ctx extends BasicCtx
         $this->ctx->Util->redis()->hdel($this->getComet2ConnKey($rpcAddr), [$connId]);
 
         return true;
+    }
+
+    /**
+     * client 离线 回调
+     *
+     * 离线状态上报处理
+     */
+    public function offline($connId, $clientInfo, $rpcAddr)
+    {
+        $uid = $this->parseClientInfo($clientInfo);
+
+        return $this->userOffline($uid, $connId, $rpcAddr);
     }
 
     private function getOnlineNicknameKey()

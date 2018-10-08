@@ -56,7 +56,7 @@ IndexPage.prototype = {
         }, function (data) {
             if (data.code != 0) {
                 alert(data.error);
-                console.log("register" + data.msg)
+                console.log("register" + data.error)
                 return ;
             }
 
@@ -67,7 +67,8 @@ IndexPage.prototype = {
     "getConnectInfoAndLogin": function () {
         $.get(this.urls.getConnectInfo, function (data) {
             if (data.code != 0) {
-                console.log("getConnectInfoAndLogin" + data.msg)
+                alert(data.error)
+                console.log("getConnectInfoAndLogin" + data.error)
                 return ;
             }
 
