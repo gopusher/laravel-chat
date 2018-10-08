@@ -125,14 +125,13 @@ class IndexController extends Controller
     //todo 限制消息长度
     public function sendToUser()
     {
-        $uid = $this->request->session()->get('uid', '');
-        if (empty($uid)) {
+        $from = $this->request->session()->get('uid', '');
+        if (empty($from)) {
             throw new \Exception("非法的请求");
         }
 
-        $from = $_SESSION['uid'];
-        $to = (string) $_POST['to'];
-        $msg = htmlspecialchars((string) $_POST['msg']);
+        $to = $this->request->input('to');
+        $msg = htmlspecialchars($this->request->input('msg', ''));
         $this->ctx->Im->sendToUser($from, $to, $msg);
 
         return $this->success();

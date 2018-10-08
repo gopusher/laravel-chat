@@ -28,6 +28,7 @@ class Ctx extends BasicCtx
             return $this->allCometServers;
         }
 
+        //todo 其实可以不用env来管理服务器配置，采用redis的方式，然后admin后台也方便管理服务器信息
         //parse env
         $num = intval(env('COMET_SERVER_NUM'));
         if ($num < 1) {
@@ -45,6 +46,17 @@ class Ctx extends BasicCtx
         }
 
         return $this->allCometServers;
+    }
+
+    public function getRpcToken($host, $port)
+    {
+        $node = $host . ':' . $port;
+        $allCometServers = $this->getAllCometServers();
+        if (isset($allCometServers[$node])) {
+            return $allCometServers[$node]['token'];
+        }
+
+        throw new \Exception('获取comet rpc token失败');
     }
 
     public function getCometServersByNodes($nodes)
@@ -246,7 +258,7 @@ class Ctx extends BasicCtx
         }
 
         $onlineKey = $this->getOnlineKey();
-        $connections = $this->redis->hmget($onlineKey, ...$uidArr);
+        $connections = $this->ctx->Util->redis()->hmget($onlineKey, ...$uidArr);
 
         return array_combine($uidArr, $connections);
     }

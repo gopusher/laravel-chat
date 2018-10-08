@@ -147,7 +147,8 @@ class Ctx extends BasicCtx
                 'content'       => $msg,
             ]);
             //todo 判断发送结果
-            $ret = $this->rpcClient->SendToConnections($host, $port, $this->getItem('comet_rpc_token'), $connIds, $msgBody);
+            $rpcToken = $this->ctx->CometRpc->getRpcToken($host, $port);
+            $ret = $this->rpcClient->SendToConnections($host, $port, $rpcToken, $connIds, $msgBody);
             \Log::error(var_export($ret, true));
         }
 
@@ -170,7 +171,8 @@ class Ctx extends BasicCtx
                 'content'       => $msg,
             ]);
             //todo 判断发送结果
-            $this->rpcClient->SendToConnections($host, $port, $this->getItem('comet_rpc_token'), $connIds, $msgBody);
+            $rpcToken = $this->ctx->CometRpc->getRpcToken($host, $port);
+            $this->rpcClient->SendToConnections($host, $port, $rpcToken, $connIds, $msgBody);
         }
 
         return true;
