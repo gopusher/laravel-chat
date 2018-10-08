@@ -79,7 +79,7 @@
         };
         onlinePushUrl = apiHost + '/im/index/pushOnline'; //上线url，没时间调试写全局了
         onlineUsersUrl = apiHost + '/im/index/getGroupOnlineUsers'; //获取在线列表，没时间调试写全局了
-        getSelfUidUrl = apiHost + '/im/index/getSelfUidUrl'; //获取自身user id，没时间调试写全局了，真实环境直接uid，因为没有账号系统所以。。
+        getSelfUidUrl = apiHost + '/im/index/getSelfUid'; //获取自身user id，没时间调试写全局了，真实环境直接uid，因为没有账号系统所以。。
 
         var indexPage = new IndexPage(urls);
         if (name.length > 0) {

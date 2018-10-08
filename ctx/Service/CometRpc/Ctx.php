@@ -3,6 +3,7 @@
 namespace Ctx\Service\CometRpc;
 
 use Ctx\Basic\Ctx as BasicCtx;
+use Illuminate\Support\Arr;
 
 /**
  * 模块接口声明文件
@@ -100,5 +101,120 @@ class Ctx extends BasicCtx
     public function checkToken($connId, $token, $clientInfo, $rpcAddr)
     {
         return $this->ctx->Im->checkToken($connId, $token, $clientInfo, $rpcAddr);
+    }
+
+    private function parseClientInfo($clientInfo)
+    {
+        try {
+            $clientInfo = $this->json_decode($clientInfo);
+            return Arr::get($clientInfo, 'uid');
+        } catch (\Exception $e) {
+            throw new \Exception('解析clientInfo出错 >> ' . $e->getMessage());
+        }
+    }
+
+    private function json_decode($string)
+    {
+        $data = json_decode($string, true);
+        if (json_last_error() !== JSON_ERROR_NONE || ! is_array($data)) {
+            throw new \Exception(sprintf('json 数据解析错误，string: %s, error: %s'), $string, json_last_error_msg());
+        }
+
+        return $data;
+    }
+
+    //在线用户
+    private function getOnlineKey()
+    {
+        return $this->imRedisKey. 'online:map';
+    }
+
+    /**
+     * client 上线 回调
+     *
+     * 在线状态上报处理
+     */
+    public function online($connId, $clientInfo, $rpcAddr)
+    {
+        $uid = $this->parseClientInfo($clientInfo);
+        $onlineKey = $this->getOnlineKey();
+
+        //todo 加锁 防止并发的时候出错
+        //添加用户 连接 到 所在的 机器
+        $userConnInfo = $this->ctx->Util->redis()->hget($onlineKey, $uid);
+        if (! empty($userConnInfo)) { //已经存在其他连接
+            try {
+                $userConnInfo = $this->json_decode($userConnInfo);
+                $userConnInfo[$connId] = $rpcAddr;
+                $this->ctx->Util->redis()->hset($onlineKey, $uid, json_encode($userConnInfo));
+            } catch (\Exception $e) {
+                $this->ctx->Util->redis()->hset($onlineKey, $uid, json_encode([
+                    $connId => $rpcAddr,
+                ]));
+            }
+        } else {
+            $this->ctx->Util->redis()->hset($onlineKey, $uid, json_encode([
+                $connId => $rpcAddr,
+            ]));
+        }
+
+        //映射 机器 上存在的 连接
+        $this->ctx->Util->redis()->hset($this->getComet2ConnKey($rpcAddr), $connId, $uid);
+
+        //todo 这里是测试代码：固定加入群组，实际情况是群组功能单独的api
+        $this->ctx->Im->joinGroup(1, $uid);
+
+        return true;
+    }
+
+    //todo 后期hash过大可以按照id hash 拆分
+    //映射 机器 上存在的 连接
+    private function getComet2ConnKey($rpcAddr)
+    {
+        return $this->imRedisKey. 'comet:map:' . $rpcAddr;
+    }
+
+    /**
+     * client 离线 回调
+     *
+     * 离线状态上报处理
+     */
+    public function offline($connId, $clientInfo, $rpcAddr)
+    {
+        $uid = $this->parseClientInfo($clientInfo);
+        $onlineKey = $this->getOnlineKey();
+
+        //todo 加锁 防止并发的时候出错
+        //添加用户 连接 从 所在的 机器
+        $userConnInfo = $this->ctx->Util->redis()->hget($onlineKey, $uid);
+        if (! empty($userConnInfo)) { //已经存在其他连接
+            try {
+                $userConnInfo = $this->json_decode($userConnInfo);
+                unset($userConnInfo[$connId]);
+                if (! empty($userConnInfo)) {
+                    $this->ctx->Util->redis()->hset($onlineKey, $uid, json_encode($userConnInfo));
+                } else {
+                    $this->ctx->Util->redis()->hdel($onlineKey, [$uid]);
+
+                    //todo 这里是测试代码：固定加入群组，实际情况是群组功能单独的api
+                    $this->ctx->Im->leaveGroup(1, $uid);
+
+                    //todo 无用代码，这里是因为没有账号系统，实际开发中不需要，因为在线状态已经能通过 getOnlineKey 获取到
+                    $this->ctx->Util->redis()->hdel($this->getOnlineNicknameKey(), [$uid]);
+                }
+            } catch (\Exception $e) {
+                $this->ctx->Util->redis()->hdel($onlineKey, [$uid]);
+            }
+        }
+
+        //映射 机器 上存在的 连接
+        $this->ctx->Util->redis()->hdel($this->getComet2ConnKey($rpcAddr), [$connId]);
+
+        return true;
+    }
+
+    private function getOnlineNicknameKey()
+    {
+        return $this->imRedisKey . 'nickname:map';
     }
 }

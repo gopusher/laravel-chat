@@ -87,4 +87,32 @@ class Ctx extends BasicCtx
     {
         return $this->imRedisKey . 'auth:' . $connId;
     }
+
+    //在线用户
+    private function geGroupKey($group)
+    {
+        return $this->imRedisKey. 'group:map:' . $group;
+    }
+
+    //加入讨论组
+    public function joinGroup($group, $uid)
+    {
+        $redisKey = $this->geGroupKey($group);
+        $this->redis->hset($redisKey, $uid, 1);
+    }
+
+    //离开讨论组
+    public function leaveGroup($group, $uid)
+    {
+        $redisKey = $this->geGroupKey($group);
+        $this->redis->hdel($redisKey, [$uid]);
+    }
+
+    //获取讨论组成员
+    //todo 这里是测试代码：固定加入群组，实际情况是群组功能单独的api
+    private function getGroupUsers($group)
+    {
+        $redisKey = $this->geGroupKey($group);
+        return array_keys($this->redis->hgetall($redisKey));
+    }
 }
