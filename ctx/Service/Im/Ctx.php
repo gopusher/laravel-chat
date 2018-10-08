@@ -110,7 +110,7 @@ class Ctx extends BasicCtx
 
     //获取讨论组成员
     //todo 这里是测试代码：固定加入群组，实际情况是群组功能单独的api
-    private function getGroupUsers($group)
+    public function getGroupUsers($group)
     {
         $redisKey = $this->geGroupKey($group);
         return array_keys($this->redis->hgetall($redisKey));

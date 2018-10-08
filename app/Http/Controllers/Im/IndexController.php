@@ -65,6 +65,46 @@ class IndexController extends Controller
         ]);
     }
 
+    //todo 无用代码，建立连接肯定有uid，这里是因为没有账号系统
+    public function getSelfUid()
+    {
+        $uid = $this->request->session()->get('uid', '');
+
+        if (empty($uid)) {
+            throw new \Exception("非法的请求");
+        }
+
+        return $this->success($uid);
+    }
+
+    //上线处理
+    //todo 无用代码，关联uid和用户登录使用的用户名，这里是因为没有账号系统
+    public function pushOnline()
+    {
+        $uid = $this->request->session()->get('uid', '');
+        $name = $this->request->session()->get('name', '');
+
+        if (empty($uid)) {
+            throw new \Exception("非法的请求");
+        }
+
+        $this->ctx->CometRpc->pushOnline($uid, $name);
+
+        return $this->success();
+    }
+
+    public function getGroupOnlineUsers()
+    {
+        $uid = $this->request->session()->get('uid', '');
+
+        if (empty($uid)) {
+            throw new \Exception("非法的请求");
+        }
+
+        $group = $this->request->input('group', 1);
+        return $this->success($this->ctx->CometRpc->getGroupOnlineUsers($group));
+    }
+
     public function test()
     {
         $uid = $this->request->session()->get('uid', '');

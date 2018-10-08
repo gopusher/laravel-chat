@@ -24,5 +24,11 @@ Route::namespace('Im')->group(function () {
         //登录
         Route::post('/register', 'IndexController@register');
         Route::get('/connectInfo', 'IndexController@connectInfo');
+        //建立comet连接后获取uid
+        Route::get('/getSelfUid', 'IndexController@getSelfUid');
+        //关联uid和用户登录使用的用户名
+        Route::post('/pushOnline', 'IndexController@pushOnline');
+        //获取当前在线用户列表
+        Route::get('/getGroupOnlineUsers', 'IndexController@getGroupOnlineUsers');
     });
 });

@@ -217,4 +217,24 @@ class Ctx extends BasicCtx
     {
         return $this->imRedisKey . 'nickname:map';
     }
+
+    //todo 无用代码，关联uid和用户登录使用的用户名，这里是因为没有账号系统
+    public function pushOnline($uid, $name)
+    {
+        $this->ctx->Util->redis()->hset($this->getOnlineNicknameKey(), $uid, $name);
+    }
+
+    public function getGroupOnlineUsers($group)
+    {
+        $uids = $this->ctx->Im->getGroupUsers($group);
+
+        $nicknames = $this->ctx->Util->redis()->hgetall($this->getOnlineNicknameKey());
+
+        $ret = [];
+        foreach ($uids as $uid) {
+            $ret[$uid] = $nicknames[$uid];
+        }
+
+        return $ret;
+    }
 }
