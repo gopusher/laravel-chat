@@ -39,6 +39,17 @@ class JsonRPC
         return json_decode($line,true);
     }
 
+    /**
+     * @see https://github.com/Gopusher/comet/wiki/api-zh#%E6%B6%88%E6%81%AF%E5%8F%91%E9%80%81%E6%8E%A5%E5%8F%A3
+     *
+     * @param $host
+     * @param $port
+     * @param $token
+     * @param array $connections
+     * @param $msg
+     * @return mixed|null
+     * @throws \Exception
+     */
     public function SendToConnections($host, $port, $token, array $connections, $msg)
     {
         $data = array(
@@ -53,6 +64,16 @@ class JsonRPC
         return $this->execute($host, $port, $data);
     }
 
+    /**
+     * https://github.com/Gopusher/comet/wiki/api-zh#%E4%B8%8B%E7%BA%BF%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%8E%A5%E5%8F%A3
+     *
+     * @param $host
+     * @param $port
+     * @param $token
+     * @param array $connections
+     * @return mixed|null
+     * @throws \Exception
+     */
     public function KickConnections($host, $port, $token, array $connections)
     {
         $data = array(

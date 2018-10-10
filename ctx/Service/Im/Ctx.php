@@ -147,6 +147,7 @@ class Ctx extends BasicCtx
                 'content'       => $msg,
             ]);
             //todo 判断发送结果
+            //@see https://github.com/Gopusher/comet/wiki/api-zh#%E6%B6%88%E6%81%AF%E5%8F%91%E9%80%81%E6%8E%A5%E5%8F%A3
             $rpcToken = $this->ctx->CometRpc->getRpcToken($host, $port);
             $ret = $this->rpcClient->SendToConnections($host, $port, $rpcToken, $connIds, $msgBody);
             \Log::error(var_export($ret, true));
@@ -171,6 +172,7 @@ class Ctx extends BasicCtx
                 'content'       => $msg,
             ]);
             //todo 判断发送结果
+            //@see https://github.com/Gopusher/comet/wiki/api-zh#%E6%B6%88%E6%81%AF%E5%8F%91%E9%80%81%E6%8E%A5%E5%8F%A3
             $rpcToken = $this->ctx->CometRpc->getRpcToken($host, $port);
             $this->rpcClient->SendToConnections($host, $port, $rpcToken, $connIds, $msgBody);
         }

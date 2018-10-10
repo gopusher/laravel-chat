@@ -115,8 +115,18 @@ class Ctx extends BasicCtx
         return true;
     }
 
-    //校验 uid 和 token 和 conn_id 当前comet机器的addr 都需要传递，防止伪造或则连接非指定的机器
-    //todo 同一个账号不能多次登录
+    /**
+     * 校验 uid 和 token 和 conn_id 当前comet机器的addr 都需要传递，防止伪造或则连接非指定的机器
+     * todo 同一个账号不能多次登录
+     * @see https://github.com/Gopusher/comet/wiki/notification-zh#%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%B8%8A%E7%BA%BFtoken%E6%A0%A1%E9%AA%8C
+     *
+     * @param $connId
+     * @param $token
+     * @param $clientInfo
+     * @param $rpcAddr
+     * @return bool
+     * @throws \Exception
+     */
     public function checkToken($connId, $token, $clientInfo, $rpcAddr)
     {
         return $this->ctx->Im->checkToken($connId, $token, $clientInfo, $rpcAddr);
@@ -140,6 +150,7 @@ class Ctx extends BasicCtx
 
     /**
      * client 上线 回调
+     * @see https://github.com/Gopusher/comet/wiki/notification-zh#%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%B8%8A%E7%BA%BF%E9%80%9A%E7%9F%A5
      *
      * 在线状态上报处理
      */
@@ -219,6 +230,7 @@ class Ctx extends BasicCtx
 
     /**
      * client 离线 回调
+     * @see https://github.com/Gopusher/comet/wiki/notification-zh#%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%B8%8B%E7%BA%BF%E9%80%9A%E7%9F%A5
      *
      * 离线状态上报处理
      */

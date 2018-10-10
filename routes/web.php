@@ -17,6 +17,7 @@ Route::namespace('Im')->group(function () {
 
     Route::prefix('/im/index')->group(function () {
         //comet 接入层rpc入口
+        //@see https://github.com/Gopusher/comet/wiki/notification-zh
         Route::post('/rpc', 'RpcController@rpc');
 
         //登录
